@@ -79188,15 +79188,12 @@ MA_PRIVATE ma_bool32 ma_dr_wav_init__internal(ma_dr_wav* pWav, ma_dr_wav_chunk_p
             cursor += offset;
             pWav->dataChunkDataPos = cursor;
             dataChunkSize = chunkSize;
-            if (sequential || !isProcessingMetadata) {
+            chunkSize -= sizeof(offsetAndBlockSizeData);
+            if (ma_dr_wav__seek_forward(pWav->onSeek, chunkSize, pWav->pUserData) == MA_FALSE) {
                 break;
-            } else {
-                if (ma_dr_wav__seek_forward(pWav->onSeek, chunkSize, pWav->pUserData) == MA_FALSE) {
-                    break;
-                }
-                cursor += chunkSize;
-                continue;
             }
+            cursor += chunkSize;
+            continue;
         }
         if (isProcessingMetadata) {
             ma_dr_wav__metadata_process_chunk(&metadataParser, &header, ma_dr_wav_metadata_type_all_including_unknown);
